@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderCategories();
   renderResources();
   initNewsletter();
+   loadJobs();
   document.getElementById('year').textContent = new Date().getFullYear();
 });
 
@@ -47,6 +48,15 @@ function initMenu(){
     });
   });
 }
+
+/* ---------- Supabase ---------- */
+const SUPABASE_URL = 'https://goylezcgimcpajlazbie.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 /* ---------- Data ---------- */
 const JOBS = [
@@ -150,7 +160,25 @@ const ICONS = {
   dollar: '<path d="M12 2v20M17 6.5c0-1.9-2.2-3.5-5-3.5s-5 1.6-5 3.5S9.2 10 12 10s5 1.6 5 3.5-2.2 3.5-5 3.5-5-1.6-5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
 };
 
+
+
 /* ---------- Renderers ---------- */
+
+async function loadJobs() {
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('status', 'published')
+    .order('posted_at', { ascending: false });
+
+  if (error) {
+    console.error('Error loading jobs:', error);
+    return;
+  }
+
+  console.log('Jobs loaded from Supabase:', data);
+}
+
 function renderJobs(){
   const grid = document.getElementById('job-grid');
   grid.innerHTML = JOBS.map(job => `
