@@ -176,7 +176,25 @@ async function loadJobs() {
     return;
   }
 
-  console.log('Jobs loaded from Supabase:', data);
+  JOBS.length = 0;
+
+  data.forEach(job => {
+    JOBS.push({
+      title: job.title,
+      company: job.company,
+      pay: job.pay,
+      location: job.location,
+      date: job.posted_at
+        ? new Date(job.posted_at).toLocaleDateString()
+        : '',
+      desc: job.description,
+      tag: job.category
+    });
+  });
+
+  renderJobs();
+
+  console.log('Jobs rendered from Supabase:', JOBS);
 }
 
 function renderJobs(){
