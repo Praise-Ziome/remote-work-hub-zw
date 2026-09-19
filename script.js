@@ -53,7 +53,7 @@ function initMenu(){
 const SUPABASE_URL = 'https://goylezcgimcpajlazbie.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
 
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -165,7 +165,7 @@ const ICONS = {
 /* ---------- Renderers ---------- */
 
 async function loadJobs() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('jobs')
     .select('*')
     .eq('status', 'published')
