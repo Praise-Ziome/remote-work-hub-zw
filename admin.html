@@ -183,7 +183,32 @@ function showDashboard() {
     jobsList.innerHTML = '<p>Could not load jobs.</p>';
     return;
   }
+async function expireJob(jobId) {
+  const confirmed = confirm(
+    'Are you sure you want to expire this job?'
+  );
 
+  if (!confirmed) {
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('jobs')
+    .update({
+      status: 'expired'
+    })
+    .eq('id', jobId);
+
+  if (error) {
+    console.error('Error expiring job:', error);
+    alert('Could not expire the job.');
+    return;
+  }
+
+  alert('Job expired successfully.');
+
+  loadAdminJobs();
+}
   if (data.length === 0) {
     jobsList.innerHTML = '<p>No jobs found.</p>';
     return;
