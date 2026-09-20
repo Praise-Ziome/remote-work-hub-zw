@@ -175,6 +175,8 @@ async function loadJobs() {
     console.error('Error loading jobs:', error);
     return;
   }
+   console.log('Supabase data:', data);
+console.log('Supabase error:', error);
 
   JOBS.length = 0;
 
