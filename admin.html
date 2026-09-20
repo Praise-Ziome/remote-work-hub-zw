@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,9 +7,6 @@
   <title>RWHZ Admin</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-
-<body>
-
 
 <body>
 
@@ -45,11 +43,15 @@
       <div>
         <h1>RWHZ Admin</h1>
         <p>Manage remote opportunities.</p>
-        <button type="button" id="logout-button">Log Out</button>
+
+        <button type="button" id="logout-button">
+          Log Out
+        </button>
       </div>
 
       <hr>
 
+      <!-- Add Job -->
       <h2>Add Job</h2>
 
       <form id="job-form">
@@ -66,7 +68,12 @@
 
         <label>
           Source
-          <input type="text" id="source" placeholder="e.g. micro1, Contra, Upwork" required>
+          <input
+            type="text"
+            id="source"
+            placeholder="e.g. micro1, Contra, Upwork"
+            required
+          >
         </label>
 
         <label>
@@ -76,16 +83,25 @@
 
         <label>
           Pay
-          <input type="text" id="pay" placeholder="e.g. $20-$30/hr">
+          <input
+            type="text"
+            id="pay"
+            placeholder="e.g. $20-$30/hr"
+          >
         </label>
 
         <label>
           Location
-          <input type="text" id="location" placeholder="e.g. Worldwide">
+          <input
+            type="text"
+            id="location"
+            placeholder="e.g. Worldwide"
+          >
         </label>
 
         <label>
           Job Type
+
           <select id="job_type">
             <option value="Freelance">Freelance</option>
             <option value="Full-time">Full-time</option>
@@ -97,288 +113,465 @@
 
         <label>
           Category
-          <input type="text" id="category" placeholder="e.g. Web Development">
+          <input
+            type="text"
+            id="category"
+            placeholder="e.g. Web Development"
+          >
         </label>
 
         <label>
           Description
-          <textarea id="description" rows="5"></textarea>
+
+          <textarea
+            id="description"
+            rows="5"
+          ></textarea>
         </label>
 
-        <button type="submit">Publish Job</button>
+        <button type="submit">
+          Publish Job
+        </button>
 
         <p id="form-message"></p>
 
       </form>
 
+
       <hr>
 
-<h2>Existing Jobs</h2>
 
-<div id="admin-jobs-list">
-  <p>Loading jobs...</p>
-</div>
+      <!-- Existing Jobs -->
+      <h2>Existing Jobs</h2>
 
-      
-      
+      <div id="admin-jobs-list">
+        <p>Loading jobs...</p>
+      </div>
+
     </section>
 
   </main>
 
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
   <script>
-   const SUPABASE_URL = 'https://goylezcgimcpajlazbie.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+    /* ---------- Supabase ---------- */
 
-const loginSection = document.getElementById('login-section');
-const dashboardSection = document.getElementById('dashboard-section');
+    const SUPABASE_URL =
+      'https://goylezcgimcpajlazbie.supabase.co';
 
-const loginForm = document.getElementById('login-form');
-const loginMessage = document.getElementById('login-message');
+    const SUPABASE_KEY =
+      'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
 
-const logoutButton = document.getElementById('logout-button');
-
-const jobForm = document.getElementById('job-form');
-const formMessage = document.getElementById('form-message');
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
 
 
-/* ---------- Authentication ---------- */
+    /* ---------- Elements ---------- */
 
-async function checkUser() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
+    const loginSection =
+      document.getElementById('login-section');
 
-  if (user) {
-    showDashboard();
-  } else {
-    showLogin();
-  }
-}
+    const dashboardSection =
+      document.getElementById('dashboard-section');
+
+    const loginForm =
+      document.getElementById('login-form');
+
+    const loginMessage =
+      document.getElementById('login-message');
+
+    const logoutButton =
+      document.getElementById('logout-button');
+
+    const jobForm =
+      document.getElementById('job-form');
+
+    const formMessage =
+      document.getElementById('form-message');
+
+    const jobsList =
+      document.getElementById('admin-jobs-list');
 
 
-function showDashboard() {
-  loginSection.hidden = true;
-  dashboardSection.hidden = false;
-    loadAdminJobs();
-}
+    /* ---------- Authentication ---------- */
 
-   async function loadAdminJobs() {
-  const jobsList = document.getElementById('admin-jobs-list');
+    async function checkUser() {
 
-  jobsList.innerHTML = '<p>Loading jobs...</p>';
+      const {
+        data: { user }
+      } = await supabaseClient.auth.getUser();
 
-  const { data, error } = await supabaseClient
-    .from('jobs')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error loading admin jobs:', error);
-    jobsList.innerHTML = '<p>Could not load jobs.</p>';
-    return;
-  }
-async function expireJob(jobId) {
-  const confirmed = confirm(
-    'Are you sure you want to expire this job?'
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  const { error } = await supabaseClient
-    .from('jobs')
-    .update({
-      status: 'expired'
-    })
-    .eq('id', jobId);
-
-  if (error) {
-    console.error('Error expiring job:', error);
-    alert('Could not expire the job.');
-    return;
-  }
-
-  alert('Job expired successfully.');
-
-  loadAdminJobs();
-}
-  if (data.length === 0) {
-    jobsList.innerHTML = '<p>No jobs found.</p>';
-    return;
-  }
-
-  jobsList.innerHTML = data.map(job => `
-    <article class="admin-job">
-      <h3>${job.title}</h3>
-
-      <p>
-        ${job.company || 'No company'} · ${job.source}
-      </p>
-
-      <p>
-        Status: <strong>${job.status}</strong>
-      </p>
-
-      <p>
-        ${job.pay || 'Pay not specified'} ·
-        ${job.location || 'Location not specified'}
-      </p>
-
-      ${
-        job.status === 'published'
-          ? `<button type="button" data-expire-job="${job.id}">
-               Expire Job
-             </button>`
-          : ''
+      if (user) {
+        showDashboard();
+      } else {
+        showLogin();
       }
-    </article>
-  `).join('');
+    }
 
-  jobsList.querySelectorAll('[data-expire-job]').forEach(button => {
-    button.addEventListener('click', () => {
-      expireJob(button.dataset.expireJob);
-    });
-  });
-}
+
+    function showDashboard() {
+
+      loginSection.hidden = true;
+      dashboardSection.hidden = false;
+
+      loadAdminJobs();
+    }
+
+
+    function showLogin() {
+
+      loginSection.hidden = false;
+      dashboardSection.hidden = true;
+    }
+
+
+    /* ---------- Login ---------- */
+
+    loginForm.addEventListener(
+      'submit',
+      async (event) => {
+
+        event.preventDefault();
+
+        loginMessage.textContent =
+          'Signing in...';
+
+        const email =
+          document.getElementById(
+            'login-email'
+          ).value.trim();
+
+        const password =
+          document.getElementById(
+            'login-password'
+          ).value;
+
+
+        const { error } =
+          await supabaseClient.auth
+            .signInWithPassword({
+              email,
+              password
+            });
+
+
+        if (error) {
+
+          console.error(error);
+
+          loginMessage.textContent =
+            'Login failed. Check your email and password.';
+
+          return;
+        }
+
+
+        loginMessage.textContent = '';
+
+        showDashboard();
+      }
+    );
+
+
+    /* ---------- Logout ---------- */
+
+    logoutButton.addEventListener(
+      'click',
+      async () => {
+
+        await supabaseClient.auth.signOut();
+
+        showLogin();
+      }
+    );
+
+
+    /* ---------- Add Job ---------- */
+
+    jobForm.addEventListener(
+      'submit',
+      async (event) => {
+
+        event.preventDefault();
+
+        formMessage.textContent =
+          'Publishing...';
+
+
+        const { error } =
+          await supabaseClient
+            .from('jobs')
+            .insert({
+
+              title:
+                document.getElementById(
+                  'title'
+                ).value.trim(),
+
+              company:
+                document.getElementById(
+                  'company'
+                ).value.trim(),
+
+              source:
+                document.getElementById(
+                  'source'
+                ).value.trim(),
+
+              source_url:
+                document.getElementById(
+                  'source_url'
+                ).value.trim(),
+
+              pay:
+                document.getElementById(
+                  'pay'
+                ).value.trim(),
+
+              location:
+                document.getElementById(
+                  'location'
+                ).value.trim(),
+
+              job_type:
+                document.getElementById(
+                  'job_type'
+                ).value,
+
+              category:
+                document.getElementById(
+                  'category'
+                ).value.trim(),
+
+              description:
+                document.getElementById(
+                  'description'
+                ).value.trim(),
+
+              posted_at:
+                new Date().toISOString(),
+
+              status:
+                'published'
+            });
+
+
+        if (error) {
+
+          console.error(error);
+
+          formMessage.textContent =
+            'Error publishing job.';
+
+          return;
+        }
+
+
+        formMessage.textContent =
+          'Job published successfully!';
+
+        jobForm.reset();
+
+        loadAdminJobs();
+      }
+    );
+
+
+    /* ---------- Load Existing Jobs ---------- */
+
     async function loadAdminJobs() {
-  const jobsList = document.getElementById('admin-jobs-list');
 
-  jobsList.innerHTML = '<p>Loading jobs...</p>';
+      jobsList.innerHTML =
+        '<p>Loading jobs...</p>';
 
-  const { data, error } = await supabaseClient
-    .from('jobs')
-    .select('*')
-    .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error loading admin jobs:', error);
-    jobsList.innerHTML = '<p>Could not load jobs.</p>';
-    return;
-  }
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .order(
+          'created_at',
+          { ascending: false }
+        );
 
-  if (data.length === 0) {
-    jobsList.innerHTML = '<p>No jobs found.</p>';
-    return;
-  }
 
-  jobsList.innerHTML = data.map(job => `
-    <article class="admin-job">
-      <h3>${job.title}</h3>
+      if (error) {
 
-      <p>
-        ${job.company || 'No company'} · ${job.source}
-      </p>
+        console.error(
+          'Error loading admin jobs:',
+          error
+        );
 
-      <p>
-        Status: <strong>${job.status}</strong>
-      </p>
+        jobsList.innerHTML =
+          '<p>Could not load jobs.</p>';
 
-      <p>
-        ${job.pay || 'Pay not specified'} ·
-        ${job.location || 'Location not specified'}
-      </p>
-
-      ${
-        job.status === 'published'
-          ? `<button type="button" data-expire-job="${job.id}">
-               Expire Job
-             </button>`
-          : ''
+        return;
       }
-    </article>
-  `).join('');
-
-  jobsList.querySelectorAll('[data-expire-job]').forEach(button => {
-    button.addEventListener('click', () => {
-      expireJob(button.dataset.expireJob);
-    });
-  });
-}
-function showLogin() {
-  loginSection.hidden = false;
-  dashboardSection.hidden = true;
-}
 
 
-/* ---------- Login ---------- */
+      if (!data || data.length === 0) {
 
-loginForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
+        jobsList.innerHTML =
+          '<p>No jobs found.</p>';
 
-  loginMessage.textContent = 'Signing in...';
-
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-
-  const { error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    console.error(error);
-    loginMessage.textContent = 'Login failed. Check your email and password.';
-    return;
-  }
-
-  loginMessage.textContent = '';
-  showDashboard();
-});
+        return;
+      }
 
 
-/* ---------- Logout ---------- */
+      jobsList.innerHTML =
+        data.map(job => `
 
-logoutButton.addEventListener('click', async () => {
-  await supabaseClient.auth.signOut();
-  showLogin();
-});
+          <article class="admin-job">
+
+            <h3>
+              ${escapeHTML(job.title)}
+            </h3>
+
+            <p>
+              ${escapeHTML(
+                job.company || 'No company'
+              )}
+              ·
+              ${escapeHTML(
+                job.source || 'Unknown source'
+              )}
+            </p>
+
+            <p>
+              Status:
+              <strong>
+                ${escapeHTML(job.status)}
+              </strong>
+            </p>
+
+            <p>
+              ${escapeHTML(
+                job.pay || 'Pay not specified'
+              )}
+              ·
+              ${escapeHTML(
+                job.location ||
+                'Location not specified'
+              )}
+            </p>
+
+            ${
+              job.status === 'published'
+                ? `
+                  <button
+                    type="button"
+                    data-expire-job="${job.id}"
+                  >
+                    Expire Job
+                  </button>
+                `
+                : ''
+            }
+
+          </article>
+
+        `).join('');
 
 
-/* ---------- Add Job ---------- */
+      jobsList
+        .querySelectorAll(
+          '[data-expire-job]'
+        )
+        .forEach(button => {
 
-jobForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
+          button.addEventListener(
+            'click',
+            () => {
 
-  formMessage.textContent = 'Publishing...';
+              expireJob(
+                button.dataset.expireJob
+              );
 
-  const { error } = await supabaseClient
-    .from('jobs')
-    .insert({
-      title: document.getElementById('title').value.trim(),
-      company: document.getElementById('company').value.trim(),
-      source: document.getElementById('source').value.trim(),
-      source_url: document.getElementById('source_url').value.trim(),
-      pay: document.getElementById('pay').value.trim(),
-      location: document.getElementById('location').value.trim(),
-      job_type: document.getElementById('job_type').value,
-      category: document.getElementById('category').value.trim(),
-      description: document.getElementById('description').value.trim(),
-      posted_at: new Date().toISOString(),
-      status: 'published'
-    });
+            }
+          );
 
-  if (error) {
-    console.error(error);
-    formMessage.textContent = 'Error publishing job.';
-    return;
-  }
-
-  formMessage.textContent = 'Job published successfully!';
-  jobForm.reset();
-});
+        });
+    }
 
 
-/* ---------- Start ---------- */
+    /* ---------- Escape HTML ---------- */
 
-checkUser();
+    function escapeHTML(value) {
+
+      const div =
+        document.createElement('div');
+
+      div.textContent =
+        value ?? '';
+
+      return div.innerHTML;
+    }
+
+
+    /* ---------- Expire Job ---------- */
+
+    async function expireJob(jobId) {
+
+      const confirmed =
+        confirm(
+          'Are you sure you want to expire this job?'
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      const { error } =
+        await supabaseClient
+          .from('jobs')
+          .update({
+            status: 'expired'
+          })
+          .eq('id', jobId);
+
+
+      if (error) {
+
+        console.error(
+          'Error expiring job:',
+          error
+        );
+
+        alert(
+          'Could not expire the job.'
+        );
+
+        return;
+      }
+
+
+      alert(
+        'Job expired successfully.'
+      );
+
+
+      loadAdminJobs();
+    }
+
+
+    /* ---------- Start ---------- */
+
+    checkUser();
+
   </script>
 
 </body>
 </html>
+```
