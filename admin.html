@@ -168,6 +168,60 @@ function showDashboard() {
     loadAdminJobs();
 }
 
+   async function loadAdminJobs() {
+  const jobsList = document.getElementById('admin-jobs-list');
+
+  jobsList.innerHTML = '<p>Loading jobs...</p>';
+
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error loading admin jobs:', error);
+    jobsList.innerHTML = '<p>Could not load jobs.</p>';
+    return;
+  }
+
+  if (data.length === 0) {
+    jobsList.innerHTML = '<p>No jobs found.</p>';
+    return;
+  }
+
+  jobsList.innerHTML = data.map(job => `
+    <article class="admin-job">
+      <h3>${job.title}</h3>
+
+      <p>
+        ${job.company || 'No company'} · ${job.source}
+      </p>
+
+      <p>
+        Status: <strong>${job.status}</strong>
+      </p>
+
+      <p>
+        ${job.pay || 'Pay not specified'} ·
+        ${job.location || 'Location not specified'}
+      </p>
+
+      ${
+        job.status === 'published'
+          ? `<button type="button" data-expire-job="${job.id}">
+               Expire Job
+             </button>`
+          : ''
+      }
+    </article>
+  `).join('');
+
+  jobsList.querySelectorAll('[data-expire-job]').forEach(button => {
+    button.addEventListener('click', () => {
+      expireJob(button.dataset.expireJob);
+    });
+  });
+}
     async function loadAdminJobs() {
   const jobsList = document.getElementById('admin-jobs-list');
 
@@ -192,13 +246,36 @@ function showDashboard() {
   jobsList.innerHTML = data.map(job => `
     <article class="admin-job">
       <h3>${job.title}</h3>
-      <p>${job.company || 'No company'} · ${job.source}</p>
-      <p>Status: <strong>${job.status}</strong></p>
-      <p>${job.pay || 'Pay not specified'} · ${job.location || 'Location not specified'}</p>
+
+      <p>
+        ${job.company || 'No company'} · ${job.source}
+      </p>
+
+      <p>
+        Status: <strong>${job.status}</strong>
+      </p>
+
+      <p>
+        ${job.pay || 'Pay not specified'} ·
+        ${job.location || 'Location not specified'}
+      </p>
+
+      ${
+        job.status === 'published'
+          ? `<button type="button" data-expire-job="${job.id}">
+               Expire Job
+             </button>`
+          : ''
+      }
     </article>
   `).join('');
-}
 
+  jobsList.querySelectorAll('[data-expire-job]').forEach(button => {
+    button.addEventListener('click', () => {
+      expireJob(button.dataset.expireJob);
+    });
+  });
+}
 function showLogin() {
   loginSection.hidden = false;
   dashboardSection.hidden = true;
