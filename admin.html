@@ -9,112 +9,232 @@
 
 <body>
 
+
+<body>
+
   <main class="admin-container">
-    <h1>RWHZ Admin</h1>
-    <p>Add a new remote opportunity.</p>
 
-    <form id="job-form">
+    <!-- Login -->
+    <section id="login-section">
+      <h1>RWHZ Admin</h1>
+      <p>Sign in to manage job listings.</p>
 
-      <label>
-        Job Title
-        <input type="text" id="title" required>
-      </label>
+      <form id="login-form">
 
-      <label>
-        Company
-        <input type="text" id="company" required>
-      </label>
+        <label>
+          Email
+          <input type="email" id="login-email" required>
+        </label>
 
-      <label>
-        Source
-        <input type="text" id="source" placeholder="e.g. micro1, Contra, Upwork" required>
-      </label>
+        <label>
+          Password
+          <input type="password" id="login-password" required>
+        </label>
 
-      <label>
-        Job URL
-        <input type="url" id="source_url" required>
-      </label>
+        <button type="submit">Sign In</button>
 
-      <label>
-        Pay
-        <input type="text" id="pay" placeholder="e.g. $20-$30/hr">
-      </label>
+        <p id="login-message"></p>
 
-      <label>
-        Location
-        <input type="text" id="location" placeholder="e.g. Worldwide">
-      </label>
+      </form>
+    </section>
 
-      <label>
-        Job Type
-        <select id="job_type">
-          <option value="Freelance">Freelance</option>
-          <option value="Full-time">Full-time</option>
-          <option value="Part-time">Part-time</option>
-          <option value="Contract">Contract</option>
-          <option value="Internship">Internship</option>
-        </select>
-      </label>
 
-      <label>
-        Category
-        <input type="text" id="category" placeholder="e.g. Web Development">
-      </label>
+    <!-- Admin Dashboard -->
+    <section id="dashboard-section" hidden>
 
-      <label>
-        Description
-        <textarea id="description" rows="5"></textarea>
-      </label>
+      <div>
+        <h1>RWHZ Admin</h1>
+        <p>Manage remote opportunities.</p>
+        <button type="button" id="logout-button">Log Out</button>
+      </div>
 
-      <button type="submit">Publish Job</button>
+      <hr>
 
-      <p id="form-message"></p>
+      <h2>Add Job</h2>
 
-    </form>
+      <form id="job-form">
+
+        <label>
+          Job Title
+          <input type="text" id="title" required>
+        </label>
+
+        <label>
+          Company
+          <input type="text" id="company" required>
+        </label>
+
+        <label>
+          Source
+          <input type="text" id="source" placeholder="e.g. micro1, Contra, Upwork" required>
+        </label>
+
+        <label>
+          Job URL
+          <input type="url" id="source_url" required>
+        </label>
+
+        <label>
+          Pay
+          <input type="text" id="pay" placeholder="e.g. $20-$30/hr">
+        </label>
+
+        <label>
+          Location
+          <input type="text" id="location" placeholder="e.g. Worldwide">
+        </label>
+
+        <label>
+          Job Type
+          <select id="job_type">
+            <option value="Freelance">Freelance</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Contract">Contract</option>
+            <option value="Internship">Internship</option>
+          </select>
+        </label>
+
+        <label>
+          Category
+          <input type="text" id="category" placeholder="e.g. Web Development">
+        </label>
+
+        <label>
+          Description
+          <textarea id="description" rows="5"></textarea>
+        </label>
+
+        <button type="submit">Publish Job</button>
+
+        <p id="form-message"></p>
+
+      </form>
+
+    </section>
+
   </main>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    const SUPABASE_URL = 'https://goylezcgimcpajlazbie.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
+   const SUPABASE_URL = 'https://goylezcgimcpajlazbie.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
 
-    const supabaseClient = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-    const form = document.getElementById('job-form');
-    const message = document.getElementById('form-message');
+const loginSection = document.getElementById('login-section');
+const dashboardSection = document.getElementById('dashboard-section');
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+const loginForm = document.getElementById('login-form');
+const loginMessage = document.getElementById('login-message');
 
-      const { error } = await supabaseClient
-        .from('jobs')
-        .insert({
-          title: document.getElementById('title').value.trim(),
-          company: document.getElementById('company').value.trim(),
-          source: document.getElementById('source').value.trim(),
-          source_url: document.getElementById('source_url').value.trim(),
-          pay: document.getElementById('pay').value.trim(),
-          location: document.getElementById('location').value.trim(),
-          job_type: document.getElementById('job_type').value,
-          category: document.getElementById('category').value.trim(),
-          description: document.getElementById('description').value.trim(),
-          posted_at: new Date().toISOString(),
-          status: 'published'
-        });
+const logoutButton = document.getElementById('logout-button');
 
-      if (error) {
-        console.error(error);
-        message.textContent = 'Error publishing job.';
-        return;
-      }
+const jobForm = document.getElementById('job-form');
+const formMessage = document.getElementById('form-message');
 
-      message.textContent = 'Job published successfully!';
-      form.reset();
+
+/* ---------- Authentication ---------- */
+
+async function checkUser() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+
+  if (user) {
+    showDashboard();
+  } else {
+    showLogin();
+  }
+}
+
+
+function showDashboard() {
+  loginSection.hidden = true;
+  dashboardSection.hidden = false;
+}
+
+
+function showLogin() {
+  loginSection.hidden = false;
+  dashboardSection.hidden = true;
+}
+
+
+/* ---------- Login ---------- */
+
+loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  loginMessage.textContent = 'Signing in...';
+
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    console.error(error);
+    loginMessage.textContent = 'Login failed. Check your email and password.';
+    return;
+  }
+
+  loginMessage.textContent = '';
+  showDashboard();
+});
+
+
+/* ---------- Logout ---------- */
+
+logoutButton.addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  showLogin();
+});
+
+
+/* ---------- Add Job ---------- */
+
+jobForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  formMessage.textContent = 'Publishing...';
+
+  const { error } = await supabaseClient
+    .from('jobs')
+    .insert({
+      title: document.getElementById('title').value.trim(),
+      company: document.getElementById('company').value.trim(),
+      source: document.getElementById('source').value.trim(),
+      source_url: document.getElementById('source_url').value.trim(),
+      pay: document.getElementById('pay').value.trim(),
+      location: document.getElementById('location').value.trim(),
+      job_type: document.getElementById('job_type').value,
+      category: document.getElementById('category').value.trim(),
+      description: document.getElementById('description').value.trim(),
+      posted_at: new Date().toISOString(),
+      status: 'published'
     });
+
+  if (error) {
+    console.error(error);
+    formMessage.textContent = 'Error publishing job.';
+    return;
+  }
+
+  formMessage.textContent = 'Job published successfully!';
+  jobForm.reset();
+});
+
+
+/* ---------- Start ---------- */
+
+checkUser();
   </script>
 
 </body>
