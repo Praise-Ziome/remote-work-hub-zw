@@ -522,48 +522,43 @@
 
     async function expireJob(jobId) {
 
-      const confirmed =
-        confirm(
-          'Are you sure you want to expire this job?'
-        );
+  const confirmed = confirm(
+    'Are you sure you want to expire this job?'
+  );
 
+  if (!confirmed) {
+    return;
+  }
 
-      if (!confirmed) {
-        return;
-      }
+  console.log('Trying to expire job ID:', jobId);
 
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .update({
+      status: 'expired'
+    })
+    .eq('id', jobId)
+    .select();
 
-      const { error } =
-        await supabaseClient
-          .from('jobs')
-          .update({
-            status: 'expired'
-          })
-          .eq('id', jobId);
+  console.log('Expire response:', data);
+  console.log('Expire error:', error);
 
+  if (error) {
+    console.error('Error expiring job:', error);
+    alert('Could not expire the job.');
+    return;
+  }
 
-      if (error) {
+  if (!data || data.length === 0) {
+    console.error('No job was updated.');
+    alert('No job was updated. Check the Supabase UPDATE policy.');
+    return;
+  }
 
-        console.error(
-          'Error expiring job:',
-          error
-        );
+  alert('Job expired successfully!');
 
-        alert(
-          'Could not expire the job.'
-        );
-
-        return;
-      }
-
-
-      alert(
-        'Job expired successfully.'
-      );
-
-
-      loadAdminJobs();
-    }
+  loadAdminJobs();
+}
 
 
     /* ---------- Start ---------- */
