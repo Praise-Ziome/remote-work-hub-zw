@@ -295,94 +295,126 @@
 
 
     /* ---------- Add Job ---------- */
+/* ---------- Add / Edit Job ---------- */
 
-    jobForm.addEventListener(
-      'submit',
-      async (event) => {
+jobForm.addEventListener(
+  'submit',
+  async (event) => {
 
-        event.preventDefault();
+    event.preventDefault();
 
-        formMessage.textContent =
-          'Publishing...';
-
-
-        const { error } =
-          await supabaseClient
-            .from('jobs')
-            .insert({
-
-              title:
-                document.getElementById(
-                  'title'
-                ).value.trim(),
-
-              company:
-                document.getElementById(
-                  'company'
-                ).value.trim(),
-
-              source:
-                document.getElementById(
-                  'source'
-                ).value.trim(),
-
-              source_url:
-                document.getElementById(
-                  'source_url'
-                ).value.trim(),
-
-              pay:
-                document.getElementById(
-                  'pay'
-                ).value.trim(),
-
-              location:
-                document.getElementById(
-                  'location'
-                ).value.trim(),
-
-              job_type:
-                document.getElementById(
-                  'job_type'
-                ).value,
-
-              category:
-                document.getElementById(
-                  'category'
-                ).value.trim(),
-
-              description:
-                document.getElementById(
-                  'description'
-                ).value.trim(),
-
-              posted_at:
-                new Date().toISOString(),
-
-              status:
-                'published'
-            });
+    formMessage.textContent =
+      jobForm.dataset.editingId
+        ? 'Saving changes...'
+        : 'Publishing...';
 
 
-        if (error) {
+    const jobData = {
 
-          console.error(error);
+      title:
+        document.getElementById('title')
+          .value.trim(),
 
-          formMessage.textContent =
-            'Error publishing job.';
+      company:
+        document.getElementById('company')
+          .value.trim(),
 
-          return;
-        }
+      source:
+        document.getElementById('source')
+          .value.trim(),
+
+      source_url:
+        document.getElementById('source_url')
+          .value.trim(),
+
+      pay:
+        document.getElementById('pay')
+          .value.trim(),
+
+      location:
+        document.getElementById('location')
+          .value.trim(),
+
+      job_type:
+        document.getElementById('job_type')
+          .value,
+
+      category:
+        document.getElementById('category')
+          .value.trim(),
+
+      description:
+        document.getElementById('description')
+          .value.trim()
+    };
 
 
-        formMessage.textContent =
-          'Job published successfully!';
+    const editingId =
+      jobForm.dataset.editingId;
 
-        jobForm.reset();
 
-        loadAdminJobs();
-      }
-    );
+    let error;
+
+
+    if (editingId) {
+
+      const result =
+        await supabaseClient
+          .from('jobs')
+          .update(jobData)
+          .eq('id', editingId);
+
+      error = result.error;
+
+    } else {
+
+      const result =
+        await supabaseClient
+          .from('jobs')
+          .insert({
+            ...jobData,
+            posted_at:
+              new Date().toISOString(),
+            status:
+              'published'
+          });
+
+      error = result.error;
+    }
+
+
+    if (error) {
+
+      console.error(error);
+
+      formMessage.textContent =
+        editingId
+          ? 'Error saving changes.'
+          : 'Error publishing job.';
+
+      return;
+    }
+
+
+    formMessage.textContent =
+      editingId
+        ? 'Job updated successfully!'
+        : 'Job published successfully!';
+
+
+    jobForm.reset();
+
+    delete jobForm.dataset.editingId;
+
+    jobForm.querySelector(
+      'button[type="submit"]'
+    ).textContent =
+      'Publish Job';
+
+
+    loadAdminJobs();
+  }
+);
 
 
     /* ---------- Load Existing Jobs ---------- */
@@ -465,18 +497,29 @@
               )}
             </p>
 
-            ${
-              job.status === 'published'
-                ? `
-                  <button
-                    type="button"
-                    data-expire-job="${job.id}"
-                  >
-                    Expire Job
-                  </button>
-                `
-                : ''
-            }
+<div class="admin-job-actions">
+
+  <button
+    type="button"
+    data-edit-job="${job.id}"
+  >
+    Edit Job
+  </button>
+
+  ${
+    job.status === 'published'
+      ? `
+        <button
+          type="button"
+          data-expire-job="${job.id}"
+        >
+          Expire Job
+        </button>
+      `
+      : ''
+  }
+
+</div>
 
           </article>
 
@@ -501,6 +544,22 @@
           );
 
         });
+      jobsList
+  .querySelectorAll('[data-edit-job]')
+  .forEach(button => {
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        editJob(
+          button.dataset.editJob
+        );
+
+      }
+    );
+
+  });
     }
 
 
@@ -517,7 +576,55 @@
       return div.innerHTML;
     }
 
+async function editJob(jobId) {
 
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .select('*')
+    .eq('id', jobId)
+    .single();
+
+  if (error) {
+    console.error('Error loading job:', error);
+    alert('Could not load this job.');
+    return;
+  }
+
+  document.getElementById('title').value =
+    data.title || '';
+
+  document.getElementById('company').value =
+    data.company || '';
+
+  document.getElementById('source').value =
+    data.source || '';
+
+  document.getElementById('source_url').value =
+    data.source_url || '';
+
+  document.getElementById('pay').value =
+    data.pay || '';
+
+  document.getElementById('location').value =
+    data.location || '';
+
+  document.getElementById('job_type').value =
+    data.job_type || 'Freelance';
+
+  document.getElementById('category').value =
+    data.category || '';
+
+  document.getElementById('description').value =
+    data.description || '';
+
+  jobForm.dataset.editingId = jobId;
+
+  jobForm.querySelector('button[type="submit"]').textContent =
+    'Save Changes';
+
+  formMessage.textContent =
+    'Editing this job. Make your changes and save.';
+}
     /* ---------- Expire Job ---------- */
 
     async function expireJob(jobId) {
