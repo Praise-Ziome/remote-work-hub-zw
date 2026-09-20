@@ -519,6 +519,13 @@ jobForm.addEventListener(
       : ''
   }
 
+  <button
+    type="button"
+    data-delete-job="${job.id}"
+  >
+    Delete Job
+  </button>
+
 </div>
 
           </article>
@@ -554,6 +561,23 @@ jobForm.addEventListener(
 
         editJob(
           button.dataset.editJob
+        );
+
+      }
+    );
+
+  });
+
+      jobsList
+  .querySelectorAll('[data-delete-job]')
+  .forEach(button => {
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        deleteJob(
+          button.dataset.deleteJob
         );
 
       }
@@ -624,6 +648,45 @@ async function editJob(jobId) {
 
   formMessage.textContent =
     'Editing this job. Make your changes and save.';
+}
+
+
+    async function deleteJob(jobId) {
+
+  const confirmed = confirm(
+    'Are you sure you want to permanently delete this job? This cannot be undone.'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  console.log('Trying to delete job ID:', jobId);
+
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .delete()
+    .eq('id', jobId)
+    .select();
+
+  console.log('Delete response:', data);
+  console.log('Delete error:', error);
+
+  if (error) {
+    console.error('Error deleting job:', error);
+    alert('Could not delete the job.');
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.error('No job was deleted.');
+    alert('No job was deleted. Check the Supabase DELETE policy.');
+    return;
+  }
+
+  alert('Job deleted successfully!');
+
+  loadAdminJobs();
 }
     /* ---------- Expire Job ---------- */
 
