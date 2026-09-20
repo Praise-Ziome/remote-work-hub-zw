@@ -111,6 +111,16 @@
 
       </form>
 
+      <hr>
+
+<h2>Existing Jobs</h2>
+
+<div id="admin-jobs-list">
+  <p>Loading jobs...</p>
+</div>
+
+      
+      
     </section>
 
   </main>
@@ -155,8 +165,39 @@ async function checkUser() {
 function showDashboard() {
   loginSection.hidden = true;
   dashboardSection.hidden = false;
+    loadAdminJobs();
 }
 
+    async function loadAdminJobs() {
+  const jobsList = document.getElementById('admin-jobs-list');
+
+  jobsList.innerHTML = '<p>Loading jobs...</p>';
+
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error loading admin jobs:', error);
+    jobsList.innerHTML = '<p>Could not load jobs.</p>';
+    return;
+  }
+
+  if (data.length === 0) {
+    jobsList.innerHTML = '<p>No jobs found.</p>';
+    return;
+  }
+
+  jobsList.innerHTML = data.map(job => `
+    <article class="admin-job">
+      <h3>${job.title}</h3>
+      <p>${job.company || 'No company'} · ${job.source}</p>
+      <p>Status: <strong>${job.status}</strong></p>
+      <p>${job.pay || 'Pay not specified'} · ${job.location || 'Location not specified'}</p>
+    </article>
+  `).join('');
+}
 
 function showLogin() {
   loginSection.hidden = false;
