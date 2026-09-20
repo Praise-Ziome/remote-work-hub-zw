@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RWHZ Admin</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <main class="admin-container">
+    <h1>RWHZ Admin</h1>
+    <p>Add a new remote opportunity.</p>
+
+    <form id="job-form">
+
+      <label>
+        Job Title
+        <input type="text" id="title" required>
+      </label>
+
+      <label>
+        Company
+        <input type="text" id="company" required>
+      </label>
+
+      <label>
+        Source
+        <input type="text" id="source" placeholder="e.g. micro1, Contra, Upwork" required>
+      </label>
+
+      <label>
+        Job URL
+        <input type="url" id="source_url" required>
+      </label>
+
+      <label>
+        Pay
+        <input type="text" id="pay" placeholder="e.g. $20-$30/hr">
+      </label>
+
+      <label>
+        Location
+        <input type="text" id="location" placeholder="e.g. Worldwide">
+      </label>
+
+      <label>
+        Job Type
+        <select id="job_type">
+          <option value="Freelance">Freelance</option>
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Contract">Contract</option>
+          <option value="Internship">Internship</option>
+        </select>
+      </label>
+
+      <label>
+        Category
+        <input type="text" id="category" placeholder="e.g. Web Development">
+      </label>
+
+      <label>
+        Description
+        <textarea id="description" rows="5"></textarea>
+      </label>
+
+      <button type="submit">Publish Job</button>
+
+      <p id="form-message"></p>
+
+    </form>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = 'https://goylezcgimcpajlazbie.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
+
+    const supabaseClient = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const form = document.getElementById('job-form');
+    const message = document.getElementById('form-message');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const { error } = await supabaseClient
+        .from('jobs')
+        .insert({
+          title: document.getElementById('title').value.trim(),
+          company: document.getElementById('company').value.trim(),
+          source: document.getElementById('source').value.trim(),
+          source_url: document.getElementById('source_url').value.trim(),
+          pay: document.getElementById('pay').value.trim(),
+          location: document.getElementById('location').value.trim(),
+          job_type: document.getElementById('job_type').value,
+          category: document.getElementById('category').value.trim(),
+          description: document.getElementById('description').value.trim(),
+          posted_at: new Date().toISOString(),
+          status: 'published'
+        });
+
+      if (error) {
+        console.error(error);
+        message.textContent = 'Error publishing job.';
+        return;
+      }
+
+      message.textContent = 'Job published successfully!';
+      form.reset();
+    });
+  </script>
+
+</body>
+</html>
