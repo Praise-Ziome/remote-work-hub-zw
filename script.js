@@ -204,8 +204,7 @@ console.log('Supabase error:', error);
 ```javascript
 function renderJobs() {
 
-  const grid =
-    document.getElementById('job-grid');
+  const grid = document.getElementById('job-grid');
 
   grid.innerHTML = JOBS.map(job => `
 
@@ -223,44 +222,32 @@ function renderJobs() {
 
       </div>
 
-
       <p class="job-company">
-        ${escapeHTML(job.company)}
+        ${escapeHTML(job.company || '')}
       </p>
-
 
       <div class="job-meta">
 
         <span>
           ${iconSvg('dollar', 13)}
-          ${escapeHTML(
-            job.pay || 'Pay not specified'
-          )}
+          ${escapeHTML(job.pay || 'Pay not specified')}
         </span>
 
         <span>
           ${iconSvg('pin', 13)}
-          ${escapeHTML(
-            job.location || 'Worldwide'
-          )}
+          ${escapeHTML(job.location || 'Worldwide')}
         </span>
 
         <span>
           ${iconSvg('calendar', 13)}
-          ${escapeHTML(
-            job.date || ''
-          )}
+          ${escapeHTML(job.date || '')}
         </span>
 
       </div>
 
-
       <p class="job-desc">
-        ${escapeHTML(
-          job.desc || job.description || ''
-        )}
+        ${escapeHTML(job.desc || '')}
       </p>
-
 
       <div class="job-card-bottom">
 
@@ -268,9 +255,7 @@ function renderJobs() {
 
           <span class="tag">
             ${escapeHTML(
-              job.tag ||
-              job.category ||
-              'Remote Opportunity'
+              job.tag || 'Remote Opportunity'
             )}
           </span>
 
@@ -281,15 +266,14 @@ function renderJobs() {
 
         </div>
 
-
-      <a
-  class="btn btn-primary"
-  href="${escapeHTML(job.source_url)}"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  View Details
-</a>
+        <a
+          class="btn btn-primary"
+          href="${escapeHTML(job.source_url || '#')}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Details
+        </a>
 
       </div>
 
@@ -298,8 +282,6 @@ function renderJobs() {
   `).join('');
 
 }
-```
-
 
 function renderCategories(){
   const grid = document.getElementById('category-grid');
