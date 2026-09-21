@@ -199,44 +199,140 @@ console.log('Supabase error:', error);
   console.log('Jobs rendered from Supabase:', JOBS);
 }
 
-function renderJobs(){
-  const grid = document.getElementById('job-grid');
+```javascript
+function renderJobs() {
+
+  const grid =
+    document.getElementById('job-grid');
+
   grid.innerHTML = JOBS.map(job => `
+
     <article class="job-card">
+
       <div class="job-card-top">
-        <h3 class="job-title">${escapeHTML(job.title)}</h3>
-        <span class="pill pill-remote">Remote</span>
+
+        <h3 class="job-title">
+          ${escapeHTML(job.title)}
+        </h3>
+
+        <span class="pill pill-remote">
+          Remote
+        </span>
+
       </div>
-      <p class="job-company">${escapeHTML(job.company)}</p>
+
+
+      <p class="job-company">
+        ${escapeHTML(job.company)}
+      </p>
+
+
       <div class="job-meta">
-        <span>${iconSvg('dollar', 13)} ${escapeHTML(job.pay)}</span>
-        <span>${iconSvg('pin', 13)} ${escapeHTML(job.location)}</span>
-        <span>${iconSvg('calendar', 13)} ${escapeHTML(job.date)}</span>
+
+        <span>
+          ${iconSvg('dollar', 13)}
+          ${escapeHTML(
+            job.pay || 'Pay not specified'
+          )}
+        </span>
+
+        <span>
+          ${iconSvg('pin', 13)}
+          ${escapeHTML(
+            job.location || 'Worldwide'
+          )}
+        </span>
+
+        <span>
+          ${iconSvg('calendar', 13)}
+          ${escapeHTML(
+            job.date || ''
+          )}
+        </span>
+
       </div>
-      <p class="job-desc">${escapeHTML(job.desc)}</p>
+
+
+      <p class="job-desc">
+        ${escapeHTML(
+          job.desc || job.description || ''
+        )}
+      </p>
+
+
       <div class="job-card-bottom">
+
         <div class="job-tags">
-          <span class="tag">${escapeHTML(job.tag)}</span>
-          <span class="verified-tag">${iconSvg('check', 13)} Verified</span>
+
+          <span class="tag">
+            ${escapeHTML(
+              job.tag ||
+              job.category ||
+              'Remote Opportunity'
+            )}
+          </span>
+
+          <span class="verified-tag">
+            ${iconSvg('check', 13)}
+            Verified
+          </span>
+
         </div>
-<button class="btn btn-primary" type="button" data-job-id="${job.id}">View Details</button>
+
+
+        <button
+          class="btn btn-primary"
+          type="button"
+          data-job-id="${job.id}"
+        >
+          View Details
+        </button>
+
       </div>
+
     </article>
+
   `).join('');
 
-grid.querySelectorAll('[data-job-id]').forEach(btn => {
 
-  btn.addEventListener('click', () => {
+  grid
+    .querySelectorAll('[data-job-id]')
+    .forEach(button => {
 
-    const jobId = btn.dataset.jobId;
+      button.addEventListener(
+        'click',
+        () => {
 
-    window.location.href =
-      `job.html?id=${jobId}`;
+          const jobId =
+            button.getAttribute(
+              'data-job-id'
+            );
 
-  });
+          console.log(
+            'Opening job ID:',
+            jobId
+          );
 
-});
+          if (!jobId) {
+
+            console.error(
+              'No job ID found on button.'
+            );
+
+            return;
+          }
+
+          window.location.href =
+            `job.html?id=${encodeURIComponent(jobId)}`;
+
+        }
+      );
+
+    });
+
 }
+```
+
 
 function renderCategories(){
   const grid = document.getElementById('category-grid');
