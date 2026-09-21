@@ -219,16 +219,23 @@ function renderJobs(){
           <span class="tag">${escapeHTML(job.tag)}</span>
           <span class="verified-tag">${iconSvg('check', 13)} Verified</span>
         </div>
-        <button class="btn btn-primary" type="button" data-job="${escapeHTML(job.title)}">View Details</button>
+<button class="btn btn-primary" type="button" data-job-id="${job.id}">View Details</button>
       </div>
     </article>
   `).join('');
 
-  grid.querySelectorAll('[data-job]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      alert(`Details for "${btn.dataset.job}" coming soon.`);
-    });
+grid.querySelectorAll('[data-job-id]').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    const jobId = btn.dataset.jobId;
+
+    window.location.href =
+      `job.html?id=${jobId}`;
+
   });
+
+});
 }
 
 function renderCategories(){
