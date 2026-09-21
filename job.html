@@ -1,0 +1,247 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Job Details | RWHZ</title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+
+</head>
+
+
+<body>
+
+  <main class="job-details-container">
+
+    <a href="index.html">
+      ← Back to Jobs
+    </a>
+
+
+    <section id="job-details">
+
+      <p>Loading job...</p>
+
+    </section>
+
+  </main>
+
+
+  <!-- Supabase -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+
+  <script>
+
+    const SUPABASE_URL =
+      'https://goylezcgimcpajlazbie.supabase.co';
+
+    const SUPABASE_KEY =
+      'sb_publishable_-0IapWLjf6T1ktwv683QCg_nqaf87Xe';
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    const jobDetails =
+      document.getElementById(
+        'job-details'
+      );
+
+
+    function escapeHTML(value) {
+
+      const div =
+        document.createElement('div');
+
+      div.textContent =
+        value ?? '';
+
+      return div.innerHTML;
+    }
+
+
+    async function loadJob() {
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      const jobId =
+        params.get('id');
+
+
+      if (!jobId) {
+
+        jobDetails.innerHTML =
+          '<p>Job not found.</p>';
+
+        return;
+      }
+
+
+      const {
+        data,
+        error
+      } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .eq('id', jobId)
+        .eq('status', 'published')
+        .single();
+
+
+      if (error || !data) {
+
+        console.error(
+          'Error loading job:',
+          error
+        );
+
+        jobDetails.innerHTML = `
+          <h1>Job not found</h1>
+          <p>
+            This opportunity may have expired
+            or is no longer available.
+          </p>
+        `;
+
+        return;
+      }
+
+
+      document.title =
+        `${data.title} | RWHZ`;
+
+
+      jobDetails.innerHTML = `
+
+        <article class="job-details-card">
+
+          <p class="job-category">
+            ${escapeHTML(
+              data.category || 'Remote Opportunity'
+            )}
+          </p>
+
+
+          <h1>
+            ${escapeHTML(data.title)}
+          </h1>
+
+
+          <h2>
+            ${escapeHTML(
+              data.company || 'Company not specified'
+            )}
+          </h2>
+
+
+          <div class="job-meta">
+
+            <span>
+              ${escapeHTML(
+                data.pay || 'Pay not specified'
+              )}
+            </span>
+
+            <span>
+              ${escapeHTML(
+                data.location ||
+                'Location not specified'
+              )}
+            </span>
+
+            <span>
+              ${escapeHTML(
+                data.job_type ||
+                'Job type not specified'
+              )}
+            </span>
+
+          </div>
+
+
+          <hr>
+
+
+          <h3>Description</h3>
+
+          <p>
+            ${escapeHTML(
+              data.description ||
+              'No description provided.'
+            )}
+          </p>
+
+
+          ${
+            data.skills
+              ? `
+                <h3>Skills</h3>
+
+                <p>
+                  ${escapeHTML(
+                    Array.isArray(data.skills)
+                      ? data.skills.join(', ')
+                      : data.skills
+                  )}
+                </p>
+              `
+              : ''
+          }
+
+
+          <p>
+            Source:
+            <strong>
+              ${escapeHTML(
+                data.source || 'Unknown'
+              )}
+            </strong>
+          </p>
+
+
+          <a
+            class="btn btn-primary"
+            href="${escapeHTML(data.source_url)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Apply for this job
+          </a>
+
+        </article>
+
+      `;
+
+    }
+
+
+    loadJob();
+
+  </script>
+
+</body>
+
+</html>
+```
