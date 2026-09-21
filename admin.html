@@ -507,6 +507,19 @@ jobForm.addEventListener(
   </button>
 
   ${
+    job.status === 'pending'
+      ? `
+        <button
+          type="button"
+          data-publish-job="${job.id}"
+        >
+          Publish Job
+        </button>
+      `
+      : ''
+  }
+
+  ${
     job.status === 'published'
       ? `
         <button
@@ -527,7 +540,6 @@ jobForm.addEventListener(
   </button>
 
 </div>
-
           </article>
 
         `).join('');
@@ -578,6 +590,22 @@ jobForm.addEventListener(
 
         deleteJob(
           button.dataset.deleteJob
+        );
+
+      }
+    );
+
+  });
+      jobsList
+  .querySelectorAll('[data-publish-job]')
+  .forEach(button => {
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        publishJob(
+          button.dataset.publishJob
         );
 
       }
@@ -650,7 +678,45 @@ async function editJob(jobId) {
     'Editing this job. Make your changes and save.';
 }
 
+async function publishJob(jobId) {
 
+  const confirmed = confirm(
+    'Publish this job to the public RWHZ website?'
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  console.log('Trying to publish job ID:', jobId);
+
+  const { data, error } = await supabaseClient
+    .from('jobs')
+    .update({
+      status: 'published'
+    })
+    .eq('id', jobId)
+    .select();
+
+  console.log('Publish response:', data);
+  console.log('Publish error:', error);
+
+  if (error) {
+    console.error('Error publishing job:', error);
+    alert('Could not publish the job.');
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.error('No job was published.');
+    alert('No job was updated.');
+    return;
+  }
+
+  alert('Job published successfully!');
+
+  loadAdminJobs();
+}
     async function deleteJob(jobId) {
 
   const confirmed = confirm(
