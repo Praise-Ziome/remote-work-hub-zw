@@ -182,16 +182,18 @@ console.log('Supabase error:', error);
 
   data.forEach(job => {
     JOBS.push({
-      title: job.title,
-      company: job.company,
-      pay: job.pay,
-      location: job.location,
-      date: job.posted_at
-        ? new Date(job.posted_at).toLocaleDateString()
-        : '',
-      desc: job.description,
-      tag: job.category
-    });
+  id: job.id,
+  title: job.title,
+  company: job.company,
+  pay: job.pay,
+  location: job.location,
+  date: job.posted_at
+    ? new Date(job.posted_at).toLocaleDateString()
+    : '',
+  desc: job.description,
+  tag: job.category,
+  source_url: job.source_url
+});
   });
 
   renderJobs();
@@ -280,55 +282,20 @@ function renderJobs() {
         </div>
 
 
-        <button
-          class="btn btn-primary"
-          type="button"
-          data-job-id="${job.id}"
-        >
-          View Details
-        </button>
+      <a
+  class="btn btn-primary"
+  href="${escapeHTML(job.source_url)}"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  View Details
+</a>
 
       </div>
 
     </article>
 
   `).join('');
-
-
-  grid
-    .querySelectorAll('[data-job-id]')
-    .forEach(button => {
-
-      button.addEventListener(
-        'click',
-        () => {
-
-          const jobId =
-            button.getAttribute(
-              'data-job-id'
-            );
-
-          console.log(
-            'Opening job ID:',
-            jobId
-          );
-
-          if (!jobId) {
-
-            console.error(
-              'No job ID found on button.'
-            );
-
-            return;
-          }
-
-          window.location.href =
-            `job.html?id=${encodeURIComponent(jobId)}`;
-
-        }
-      );
-
-    });
 
 }
 ```
