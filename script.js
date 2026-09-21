@@ -201,7 +201,7 @@ console.log('Supabase error:', error);
   console.log('Jobs rendered from Supabase:', JOBS);
 }
 
-```javascript
+
 function renderJobs() {
 
   const grid = document.getElementById('job-grid');
