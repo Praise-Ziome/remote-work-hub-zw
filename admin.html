@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,87 +47,6 @@
           Log Out
         </button>
       </div>
-
-      <hr>
-
-
-      <!-- Submit Vacancy via Cloudflare Worker -->
-      <hr>
-
-      <h2>Submit Vacancy via Worker</h2>
-      <p>Submit a vacancy through the secure intake service. New submissions are saved as pending for review.</p>
-
-      <form id="worker-job-form">
-        <label>
-          Submission Key
-          <input type="password" id="submission-key" autocomplete="off" required>
-        </label>
-
-        <label>
-          Job Title
-          <input type="text" id="worker-title" required>
-        </label>
-
-        <label>
-          Company
-          <input type="text" id="worker-company">
-        </label>
-
-        <label>
-          Source
-          <input type="text" id="worker-source" placeholder="e.g. micro1, Contra, Upwork">
-        </label>
-
-        <label>
-          Job URL
-          <input type="url" id="worker-source-url" required>
-        </label>
-
-        <label>
-          Pay
-          <input type="text" id="worker-pay" placeholder="e.g. $20-$30/hr">
-        </label>
-
-        <label>
-          Location
-          <input type="text" id="worker-location" placeholder="e.g. Worldwide">
-        </label>
-
-        <label>
-          Job Type
-          <select id="worker-job-type">
-            <option value="">Not specified</option>
-            <option value="Freelance">Freelance</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Part-time">Part-time</option>
-            <option value="Contract">Contract</option>
-            <option value="Internship">Internship</option>
-          </select>
-        </label>
-
-        <label>
-          Category
-          <input type="text" id="worker-category" placeholder="e.g. Web Development">
-        </label>
-
-        <label>
-          Skills
-          <input type="text" id="worker-skills" placeholder="Separate skills with commas">
-        </label>
-
-        <label>
-          Application Deadline
-          <input type="date" id="worker-deadline">
-        </label>
-
-        <label>
-          Description
-          <textarea id="worker-description" rows="5"></textarea>
-        </label>
-
-        <button type="submit" id="worker-submit-button">Submit as Pending</button>
-        <p id="worker-form-message" role="status" aria-live="polite"></p>
-      </form>
 
       <hr>
 
@@ -278,15 +196,6 @@
     const formMessage =
       document.getElementById('form-message');
 
-    const workerJobForm =
-      document.getElementById('worker-job-form');
-
-    const workerFormMessage =
-      document.getElementById('worker-form-message');
-
-    const workerSubmitButton =
-      document.getElementById('worker-submit-button');
-
     const jobsList =
       document.getElementById('admin-jobs-list');
 
@@ -382,74 +291,6 @@
         showLogin();
       }
     );
-
-
-    /* ---------- Submit Vacancy via Cloudflare Worker ---------- */
-
-    workerJobForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const submissionKey =
-        document.getElementById('submission-key').value.trim();
-
-      const jobData = {
-        title: document.getElementById('worker-title').value.trim(),
-        company: document.getElementById('worker-company').value.trim(),
-        source: document.getElementById('worker-source').value.trim(),
-        source_url: document.getElementById('worker-source-url').value.trim(),
-        description: document.getElementById('worker-description').value.trim(),
-        category: document.getElementById('worker-category').value.trim(),
-        skills: document.getElementById('worker-skills').value.trim(),
-        pay: document.getElementById('worker-pay').value.trim(),
-        location: document.getElementById('worker-location').value.trim(),
-        job_type: document.getElementById('worker-job-type').value,
-        posted_at: new Date().toISOString(),
-        deadline: document.getElementById('worker-deadline').value || null
-      };
-
-      workerSubmitButton.disabled = true;
-      workerSubmitButton.textContent = 'Submitting...';
-      workerFormMessage.textContent = 'Sending vacancy for review...';
-
-      try {
-        const response = await fetch(
-          'https://rwhz-job-submission.ziomepraiser.workers.dev/',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-submission-key': submissionKey
-            },
-            body: JSON.stringify(jobData)
-          }
-        );
-
-        const result = await response.json().catch(() => ({}));
-
-        if (!response.ok || !result.success) {
-          const message =
-            result.error || result.message || `Request failed (${response.status}).`;
-          throw new Error(message);
-        }
-
-        workerFormMessage.textContent =
-          `Submitted successfully. "${result.job?.title || jobData.title}" is now pending approval.`;
-
-        workerJobForm.reset();
-
-        // Keep the key available only in this page session for additional submissions.
-        document.getElementById('submission-key').value = submissionKey;
-
-        loadAdminJobs();
-      } catch (error) {
-        console.error('Worker submission failed:', error);
-        workerFormMessage.textContent =
-          `Submission failed: ${error.message || 'Please try again.'}`;
-      } finally {
-        workerSubmitButton.disabled = false;
-        workerSubmitButton.textContent = 'Submit as Pending';
-      }
-    });
 
 
     /* ---------- Add Job ---------- */
